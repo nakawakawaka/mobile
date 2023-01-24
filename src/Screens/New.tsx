@@ -1,31 +1,51 @@
 import { useState } from 'react';
-import { View, ScrollView, Text, TextInput, TouchableOpacity } from 'react-native';
+import { View, ScrollView, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
+import { api } from '../lib/axios';
 import { BackButton } from '../components/BackButton';
-import { Checkbox } from '../components/CheckBox';
+import { Checkbox } from '../components/Checkbox';
 import colors from 'tailwindcss/colors';
 
 const availableWeekDays = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
 
 export function New() {
+  const [title, setTitle] = useState('');
   const [weekDays, setWeekDays] = useState<number[]>([]);
 
   function handleToggleWeekDay(weekDayIndex: number) {
-    if(weekDays.includes(weekDayIndex)){
+    if (weekDays.includes(weekDayIndex)) {
       setWeekDays(prevState => prevState.filter(weekDay => weekDay !== weekDayIndex));
     } else {
       setWeekDays(prevState => [...prevState, weekDayIndex]);
     }
   }
 
-  return(
+  async function handleCreateNewHabit() {
+    try {
+      if (!title.trim() || weekDays.length === 0) {
+        Alert.alert('Novo hábito', 'Informe o nome do hábito e escolha a periodicidade.');
+      }
+
+      await api.post('/habits', { title, weekDays });
+
+      setTitle('');
+      setWeekDays([]);
+
+      Alert.alert('Novo hábito', 'Hábito criado com sucesso!');
+    } catch (error) {
+      console.log(error);
+      Alert.alert('Ops', 'Não foi possível criar o novo hábito.');
+    }
+  }
+
+  return (
     <View className="flex-1 bg-background px-8 pt-16">
-      <ScrollView 
+      <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 400 }}        
+        contentContainerStyle={{ paddingBottom: 400 }}
       >
-        
+
         <BackButton />
 
         <Text className="mt-6 text-white font-extrabold text-3xl">
@@ -40,6 +60,8 @@ export function New() {
           className="h-12 pl-4 rounded-lg mt-3 bg-zinc-900 text-white border-2 border-zinc-800 focus:border-green-600"
           placeholder="Exercícios, dormir bem, etc..."
           placeholderTextColor={colors.zinc[400]}
+          onChangeText={setTitle}
+          value={title}
         />
 
         <Text className="font-semibold mt-4 mb-3 text-white text-base">
@@ -48,7 +70,7 @@ export function New() {
 
         {
           availableWeekDays.map((weekDay, index) => (
-            <Checkbox 
+            <Checkbox
               key={weekDay}
               title={weekDay}
               checked={weekDays.includes(index)}
@@ -60,8 +82,9 @@ export function New() {
         <TouchableOpacity
           className="w-full h-14 flex-row items-center justify-center bg-green-600 rounded-md mt-6"
           activeOpacity={0.7}
+          onPress={handleCreateNewHabit}
         >
-          <Feather 
+          <Feather
             name="check"
             size={20}
             color={colors.white}
@@ -72,5 +95,5 @@ export function New() {
         </TouchableOpacity>
       </ScrollView>
     </View>
-  )  
+  )
 }

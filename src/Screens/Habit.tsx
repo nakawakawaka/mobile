@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 
 import { BackButton } from '../components/BackButton';
 import { ProgressBar } from '../components/ProgressBar';
-import { Checkbox } from '../components/CheckBox';
+import { Checkbox } from '../components/Checkbox';
 
 interface Params {
   date: string;
